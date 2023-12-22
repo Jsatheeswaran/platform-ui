@@ -26,8 +26,8 @@ const TableOrganism = ({ module = "", entity = "", columns = [], ...rest }) => {
 			{loading ? (
 				<p>Loading...</p>
 			) : (
-				<table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-					<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+				<table className="w-full text-sm text-left rtl:text-right text-gray-600">
+					<thead className="text-xs uppercase  bg-blue-300">
 						<tr>
 							{columns.map((column, index) => (
 								<th key={`${column?.header?.substring(0, 3)}_${index}`} scope="col" className="px-6 py-3">
@@ -39,13 +39,14 @@ const TableOrganism = ({ module = "", entity = "", columns = [], ...rest }) => {
 					<tbody>
 						{data?.length > 0 ? (
 							data.map((row, rowIndex) => (
-								<tr
-									key={rowIndex}
-									className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
-								>
+								<tr key={rowIndex} className="bg-white border-b border-gray-200">
 									{columns?.map((column, colIndex) => (
 										<td key={colIndex} className="px-6 py-4">
-											{row?.[column.accessor] || ""}
+											{column?.getCell
+												? column?.getCell(row?.[column.accessor] || "")
+												: column?.getRow
+												? column?.getRow({ row, ...rest })
+												: row?.[column.accessor] || ""}
 										</td>
 									))}
 								</tr>

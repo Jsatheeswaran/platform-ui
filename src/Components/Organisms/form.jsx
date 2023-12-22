@@ -1,9 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import _ from "lodash";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { ActionApi } from "../../api";
+import { ActionApi, ActionApiByPk, QueryApiByPk } from "../../api";
 import ButtonAtom from "../Atoms/button";
 import { ComponentMap } from "../utils";
 
@@ -46,7 +46,7 @@ const generateFormFields = ({ formSchema = {}, register, errors }) => {
 				<div key={`${accessor}_${i}`} className="flex flex-col gap-2">
 					<label>{schema.label}</label>
 					<Component register={register} name={accessor} />
-					{errors[accessor] && <p>{errors[accessor].message}</p>}
+					{errors[accessor] && <p className="text-red-600">{errors[accessor].message}</p>}
 				</div>
 			);
 		});
@@ -54,43 +54,71 @@ const generateFormFields = ({ formSchema = {}, register, errors }) => {
 	return null;
 };
 
-const FormOrganism = ({ formSchema, module, entity, buttonLabel = "Save", parentId = null, onAddTask, ...props }) => {
+const FormOrganism = ({
+	formSchema,
+	module,
+	entity,
+	buttonLabel = "",
+	parentId = null,
+	toggleModal = () => {},
+	triggerParentReload = () => {},
+	...props
+}) => {
 	const {
 		handleSubmit,
+		watch,
 		reset,
-		formState: { errors },
+		formState: { errors, isDirty, isValid, dirtyFields },
 		register,
 	} = useForm({
 		resolver: yupResolver(yup.object().shape(generateValidationSchema(formSchema))),
 	});
 
-	// useEffect(()=>{
-	// 	if()
-	// },[JSON.stringify(data)])
+	const [parentRecord, setParentRecord] = useState({});
+
+	useEffect(() => {
+		if (parentId) {
+			QueryApiByPk({
+				module,
+				entity,
+				id: parentId,
+			}).then((e) => {
+				if (!_.isEmpty(e)) {
+					reset(e);
+					// setParentRecord(parentRecord)
+				}
+			});
+		}
+	}, [parentId]);
 
 	const onSubmit = (data) => {
-		console.log("🚀 ~ file: form.jsx:23 ~ onSubmit ~ data:", data);
-		ActionApi({
+		(parentId ? ActionApiByPk : ActionApi)({
 			module,
 			entity,
 			data,
+			id: parentId,
+		}).then((e) => {
+			triggerParentReload();
 		});
-		// Pass the form data to the parent component
-		// onAddTask(data);
-
-		// Reset the form after submitting
-		// reset();
 	};
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-10">{generateFormFields({ formSchema, register, errors })}</div>
+			<div className="flex flex-col gap-5">
+				<div className="grid grid-cols-1 md:grid-cols-4 gap-10">{generateFormFields({ formSchema, register, errors })}</div>
 
-			<div className="flex justify-center">
-				<ButtonAtom type="submit" label={buttonLabel} />
+				<div className="flex justify-center gap-5">
+					{isDirty && !_.isEmpty(dirtyFields) && (
+						<ButtonAtom
+							label={buttonLabel || parentId ? "Reset" : "Cancel"}
+							overrideClass="bg-white border-2 border-blue-300"
+							onClick={(e) => reset()}
+						/>
+					)}
+					{isDirty && !_.isEmpty(dirtyFields) && <ButtonAtom type="submit" label={buttonLabel || parentId ? "Save" : "Add"} />}
+				</div>
 			</div>
 		</form>
 	);
 };
-
 export default FormOrganism;

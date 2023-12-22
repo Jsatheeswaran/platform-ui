@@ -8,11 +8,19 @@ export const ActionApi = async ({ module, entity, data = {} }) => {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error);
-	} finally {
-		// setLoading(false);
 	}
 };
-export const QueryApi = async ({ module, entity }) => {
+export const ActionApiByPk = async ({ module, entity, id, data = {} }) => {
+	try {
+		const response = await axios.put(`http://localhost:8080/${module}/${entity}/${id}`, data);
+		if (response?.data) {
+			return response?.data;
+		}
+	} catch (error) {
+		console.error("Error fetching data:", error);
+	}
+};
+export const QueryApi = async ({ module, entity, ...rest }) => {
 	try {
 		const response = await axios.get(`http://localhost:8080/${module}/${entity}`);
 		if (response?.data) {
@@ -20,7 +28,26 @@ export const QueryApi = async ({ module, entity }) => {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error);
-	} finally {
-		// setLoading(false);
+	}
+};
+export const QueryApiByPk = async ({ module, entity, id, ...rest }) => {
+	try {
+		const response = await axios.get(`http://localhost:8080/${module}/${entity}/${id}`);
+		if (response?.data) {
+			return response?.data;
+		}
+	} catch (error) {
+		console.error("Error fetching data:", error);
+	}
+};
+
+export const DeleteApiByPk = async ({ module, entity, id, ...rest }) => {
+	try {
+		const response = await axios.delete(`http://localhost:8080/${module}/${entity}/${id}`);
+		if (response?.data) {
+			return response?.data;
+		}
+	} catch (error) {
+		console.error("Error fetching data:", error);
 	}
 };
