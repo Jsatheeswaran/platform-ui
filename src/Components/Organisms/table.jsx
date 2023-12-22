@@ -1,26 +1,5 @@
-import _ from "lodash";
-import React, { useEffect, useState } from "react";
-import { QueryApi } from "../../api";
-
-const TableOrganism = ({ module = "", entity = "", columns = [], ...rest }) => {
-	const [data, setData] = useState([]);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			const res = await QueryApi({
-				module,
-				entity,
-			});
-			if (!_.isEmpty(res)) {
-				setData(res);
-				setLoading(false);
-			}
-		};
-
-		fetchData();
-	}, []);
-
+import React from "react";
+const TableOrganism = ({ columns = [], data = [], loading, ...rest }) => {
 	return (
 		<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
 			{loading ? (

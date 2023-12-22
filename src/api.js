@@ -30,6 +30,16 @@ export const QueryApi = async ({ module, entity, ...rest }) => {
 		console.error("Error fetching data:", error);
 	}
 };
+export const ListApi = async ({ module, entity, limit, page, ...rest }) => {
+	try {
+		const response = await axios.get(`http://localhost:8080/${module}/${entity}/${limit}/${page}`);
+		if (response?.data) {
+			return response?.data;
+		}
+	} catch (error) {
+		console.error("Error fetching data:", error);
+	}
+};
 export const QueryApiByPk = async ({ module, entity, id, ...rest }) => {
 	try {
 		const response = await axios.get(`http://localhost:8080/${module}/${entity}/${id}`);
